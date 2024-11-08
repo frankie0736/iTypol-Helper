@@ -4,5 +4,5 @@
 2. 修改插件名称
 
 ## 操作说明
-[说明：https://wpbricksdemo.xyz/preparations/](https://wpbricksdemo.xyz/preparations/)
+- [说明：https://wpbricksdemo.xyz/preparations/](https://wpbricksdemo.xyz/preparations/)
 - [FAQ：https://wpbricksdemo.xyz/faq/](https://wpbricksdemo.xyz/faq/)
