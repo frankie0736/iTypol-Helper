@@ -1,5 +1,7 @@
 # [iTypol Helper](https://github.com/frankie0736/iTypol-Helper)
 ## Release Note
+
+### 2024-11-8 v1.5
 1. 添加自动生成Quiz schema的代码
 2. 修改插件名称
 
