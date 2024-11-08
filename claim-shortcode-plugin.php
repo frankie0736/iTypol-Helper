@@ -1,8 +1,8 @@
 <?php
 /*
 Plugin Name: Blog Post Generator基础功能插件
-Description: 添加Quiz CPT，设置quiz & post之间的关联（基于MB）；解析[claim], [quiz], [related_quiz_post]短代码，以及相关的css
-Version: 1.4
+Description: 添加Quiz CPT，设置quiz & post之间的关联（基于MB）；解析[claim], [quiz], [related_quiz_post]短代码，以及相关的css；自动添加quiz schema；修改插件名称。
+Version: 1.5
 Author: Frankie Xu
 */
 
@@ -320,3 +320,76 @@ function post_to_quiz_relationship_custom_func() {
     ] );
 }
 /* relationship Start */
+
+/* Automate Generate Quiz Schema Codes on Quiz Singular Pages Start*/
+// 在 single quiz 页面加载 schema
+function generate_quiz_schema(){  
+    if (is_singular('quiz')) {
+      
+        $content = get_the_content();
+    // 使用正则表达式移除 [quiz] 和 [/quiz] 标签，并匹配其中的 JSON 内容
+    preg_match_all('/\[quiz\](.*?)\[\/quiz\]/s', $content, $matches);
+    
+    // 解析提取的 JSON 字符串
+    $quizzes = array_map(function($quiz) {
+        return json_decode($quiz, true);
+    }, $matches[1]);
+    
+    // 准备生成 schema 结构
+    $schema = [
+        "@context" => "https://schema.org/",
+        "@type" => "Quiz",
+        "assesses" => get_the_title(),
+        "name" => "Quiz about ".get_the_title(),
+        "about" => [
+            "@type" => "Thing",
+            "name" => get_the_title()
+        ],
+        "hasPart" => []
+    ];
+    
+    // 转换每个 quiz 数据到 schema 格式
+    foreach ($quizzes as $quiz) {
+        $question = [
+            "@type" => "Question",
+            "eduQuestionType" => "Multiple choice",
+            "learningResourceType" => "Practice problem",
+            "text" => $quiz["question"],
+            "comment" => [
+                "@type" => "Comment",
+                "text" => $quiz["explanation"]
+            ],
+            "encodingFormat" => "text/markdown",
+            "suggestedAnswer" => [],
+            "acceptedAnswer" => null
+        ];
+    
+        foreach ($quiz["answers"] as $index => $answer) {
+            $answerSchema = [
+                "@type" => "Answer",
+                "position" => $index,
+                "encodingFormat" => "text/markdown",
+                "text" => $answer["answer"],
+                "comment" => [
+                    "@type" => "Comment",
+                    "text" => $answer["hint"]
+                ]
+            ];
+    
+            if ($answer["isCorrect"]) {
+                $question["acceptedAnswer"] = $answerSchema;
+            } else {
+                $question["suggestedAnswer"][] = $answerSchema;
+            }
+        }
+    
+        $schema["hasPart"][] = $question;
+    }
+    
+    // 将生成的 schema 转换为 JSON 并输出
+    $quiz_schema = json_encode($schema, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+      echo "<script type='application/ld+json'>$quiz_schema</script>";
+    }
+    }
+    add_action('wp_head', 'generate_quiz_schema');
+/* Automate Generate Quiz Schema Codes on Quiz Singular Pages End*/
