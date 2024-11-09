@@ -1,8 +1,8 @@
 <?php
 /*
-Plugin Name: Blog Post Generator基础功能插件
-Description: 添加Quiz CPT，设置quiz & post之间的关联（基于MB）；解析[claim], [quiz], [related_quiz_post]短代码，以及相关的css；自动添加quiz schema；修改插件名称。
-Version: 1.5
+Plugin Name: iTypol Helper
+Description: 添加Quiz CPT，设置quiz & post之间的关联（基于MB）；解析[claim], [quiz], [related_quiz_post]短代码，以及相关的css;自动添加quiz schema；修改插件名称
+Version: 1.6
 Author: Frankie Xu
 */
 
@@ -321,6 +321,7 @@ function post_to_quiz_relationship_custom_func() {
 }
 /* relationship Start */
 
+
 /* Automate Generate Quiz Schema Codes on Quiz Singular Pages Start*/
 // 在 single quiz 页面加载 schema
 function generate_quiz_schema(){  
@@ -341,6 +342,9 @@ function generate_quiz_schema(){
         "@type" => "Quiz",
         "assesses" => get_the_title(),
         "name" => "Quiz about ".get_the_title(),
+		"typicalAgeRange" => "18-",
+      	"educationalLevel" => "intermediate",
+		"name" => "Quiz about ".get_the_title(),
         "about" => [
             "@type" => "Thing",
             "name" => get_the_title()
@@ -354,6 +358,7 @@ function generate_quiz_schema(){
             "@type" => "Question",
             "eduQuestionType" => "Multiple choice",
             "learningResourceType" => "Practice problem",
+            "name" => $quiz["question"],
             "text" => $quiz["question"],
             "comment" => [
                 "@type" => "Comment",
@@ -377,6 +382,13 @@ function generate_quiz_schema(){
             ];
     
             if ($answer["isCorrect"]) {
+				$answerExplanation = [
+					"answerExplanation" => [
+						"@type" => "Comment",
+						"text" => $quiz["explanation"]
+					]
+				];
+				$answerSchema = array_merge($answerSchema, $answerExplanation);
                 $question["acceptedAnswer"] = $answerSchema;
             } else {
                 $question["suggestedAnswer"][] = $answerSchema;
